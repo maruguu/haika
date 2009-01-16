@@ -10,13 +10,60 @@ var haika = function() {
     render: function(status) {
       var http = /(s?https?:\/\/[-_.!~*'()a-zA-Z0-9;\/?:\@&=+\$,%#]+)/g;  //'
       var img = /(s?https?:\/\/[-_.!~*'()a-zA-Z0-9;\/?:\@&=+\$,%#]+(jpg|jpeg|gif|png|bmp))/g;  //'
-    
+      var anchor = /(<a href=").+(">.+<\/a>)/g;
+      var youtube = /(s?https?:\/\/[-_.!~*'()a-zA-Z0-9;\/?:\@&=+\$,%#]+\.youtube\.com\/[-_.!~*'()a-zA-Z0-9;\/?:\@&=+\$,%#]+)/g; //'
+      
       $('keyword').innerHTML = status.keyword;
       var txt = status.text.replace(status.keyword + '=', '');
-      if(txt.match(img)) {
-        txt = txt.replace(img, '<img width="115px" src="$1" />');
-      } else {
-        txt = txt.replace(http, '<a href="$1">$1</a>');
+      
+      var atag = txt.match(anchor);
+      if(atag) {
+        for(i = 0; i < atag.length; i++) {
+          txt = txt.replace(atag[i], '<ATAG ' + i + ' />');
+        }
+      }
+      var youtubetag = txt.match(youtube);
+      if(youtubetag) {
+        for(i = 0; i < youtubetag.length; i++) {
+          txt = txt.replace(youtubetag[i], '<YOUTUBETAG ' + i + ' />');
+        }
+      }
+      var imgtag = txt.match(img);
+      if(imgtag) {
+        for(i = 0; i < imgtag.length; i++) {
+          txt = txt.replace(imgtag[i], '<IMGTAG ' + i + ' />');
+        }
+      }
+      
+      var urltag = txt.match(http);
+      if(urltag) {
+        for(i = 0; i < urltag.length; i++) {
+          txt = txt.replace(urltag[i], '<URLTAG ' + i + ' />');
+        }
+      }
+      
+      // Replace
+      if(urltag) {
+        for(i = 0; i < urltag.length; i++) {
+          txt = txt.replace('<URLTAG ' + i + ' />', '<a href="' + urltag[i] + '">' + urltag[i] + '</a>');
+        }
+      }
+      if(youtubetag) {
+        var template = '<object width="115" type="application/x-shockwave-flash"><param name="movie" value="<URL>"></param><param name="wmode" value="transparent"></param></object>';
+        for(i = 0; i < youtubetag.length; i++) {
+          var youtubeobj = template.replace('<URL>', youtubetag[i]);
+          txt = txt.replace('<YOUTUBETAG ' + i + ' />', youtubeobj);
+        }
+      }
+      if(imgtag) {
+        for(i = 0; i < imgtag.length; i++) {
+          txt = txt.replace('<IMGTAG ' + i + ' />', '<img width="115px" src="' + imgtag[i] + '" />');
+        }
+      }
+      if(atag) {
+        for(i = 0; i < atag.length; i++) {
+          txt = txt.replace('<ATAG ' + i + ' />', atag[i]);
+        }
       }
       $('content').innerHTML = txt;
       $('content').scrollTop = 0;
