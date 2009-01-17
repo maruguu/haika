@@ -17,7 +17,7 @@ var haika = function() {
   
   haikaSettings.prototype.write = function() {
     System.Gadget.Settings.write('auto_next', this.auto_next);
-    this.writeInt('interval', this.interval, 5, 1, 3600);
+    this.writeInt('interval', this.interval, 30, 1, 3600);
   };
   
   haikaSettings.prototype.writeInt = function(key, value, def, min, max) {
