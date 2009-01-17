@@ -3,9 +3,34 @@ var haika = function() {
   var status_counter = 0;
   var connecting = false;
   var refreshTimer = null;
-  var auto_next = false;
+  
+  var haikaSettings = function () {
+    this.auto_next = false;
+    this.interval = 30;
+  };
+  
+  haikaSettings.prototype.read = function() {
+    this.auto_next = System.Gadget.Settings.read('auto_next');
+    this.interval = System.Gadget.Settings.read('interval');
+    if (!this.interval || this.interval <= 0) this.interval = 30;
+  };
+  
+  haikaSettings.prototype.write = function() {
+    System.Gadget.Settings.write('auto_next', this.auto_next);
+    this.writeInt('interval', this.interval, 5, 1, 3600);
+  };
+  
+  haikaSettings.prototype.writeInt = function(key, value, def, min, max) {
+    var v = parseInt(value);
+    if(isNaN(v) || v < min || v > max) v = def;
+    System.Gadget.Settings.write(key, v);
+  };
+  
+  var settings = new haikaSettings();
   
   return {
+    userSettings: settings,
+    
     // render content
     render: function(status) {
       var http = /(s?https?:\/\/[-_.!~*'()a-zA-Z0-9;\/?:\@&=+\$,%#]+)/g;  //'
@@ -22,12 +47,15 @@ var haika = function() {
           txt = txt.replace(atag[i], '<ATAG ' + i + ' />');
         }
       }
+      /*
+      // サムネイル表示にしたい
       var youtubetag = txt.match(youtube);
       if(youtubetag) {
         for(i = 0; i < youtubetag.length; i++) {
           txt = txt.replace(youtubetag[i], '<YOUTUBETAG ' + i + ' />');
         }
       }
+      */
       var imgtag = txt.match(img);
       if(imgtag) {
         for(i = 0; i < imgtag.length; i++) {
@@ -48,13 +76,15 @@ var haika = function() {
           txt = txt.replace('<URLTAG ' + i + ' />', '<a href="' + urltag[i] + '">' + urltag[i] + '</a>');
         }
       }
+      /*
       if(youtubetag) {
-        var template = '<object width="115" type="application/x-shockwave-flash"><param name="movie" value="<URL>"></param><param name="wmode" value="transparent"></param></object>';
+        var template = '<object width="425" height="350"><param name="movie" value="<URL>"></param><param name="wmode" value="transparent"></param><embed src="<URL>" type="application/x-shockwave-flash" wmode="transparent" width="425" height="350"></embed></object>';
         for(i = 0; i < youtubetag.length; i++) {
           var youtubeobj = template.replace('<URL>', youtubetag[i]);
           txt = txt.replace('<YOUTUBETAG ' + i + ' />', youtubeobj);
         }
       }
+      */
       if(imgtag) {
         for(i = 0; i < imgtag.length; i++) {
           txt = txt.replace('<IMGTAG ' + i + ' />', '<img width="115px" src="' + imgtag[i] + '" />');
@@ -65,6 +95,7 @@ var haika = function() {
           txt = txt.replace('<ATAG ' + i + ' />', atag[i]);
         }
       }
+      txt = txt.replace(/\r\n/g, '<br />');
       $('content').innerHTML = txt;
       $('content').scrollTop = 0;
     },
@@ -76,6 +107,8 @@ var haika = function() {
       
       status_queue = null;
       var url = 'http://h.hatena.ne.jp/api/statuses/public_timeline.json';
+      //var url = 'http://h.hatena.ne.jp/api/statuses/keyword_timeline/YouTube.json';
+      url = encodeURI(url);
       var xhr = new XMLHttpRequest();
       xhr.open('GET', url, true);
       xhr.setRequestHeader('If-Modified-Since', "Sat, 1 Jan 2000 00:00:00 GMT");
@@ -120,13 +153,18 @@ var haika = function() {
     },
     
     enableAutoplay: function() {
-      auto_next = true;
-      haika.refresh();
+      settings.auto_next = true;
+      System.Gadget.Settings.write('auto_next', settings.auto_next);
+      if(refreshTimer) {
+        clearTimeout(refreshTimer);
+      }
+      refreshTimer = setTimeout(function() { haika.refresh(); }, settings.interval * 1000);
       $('auto_content').innerHTML = '<img src="images/autoplay2.png" />';
     },
     
     disableAutoplay: function() {
-      auto_next = false;
+      settings.auto_next = false;
+      System.Gadget.Settings.write('auto_next', settings.auto_next);
       if(refreshTimer) {
         clearTimeout(refreshTimer);
       }
@@ -134,7 +172,7 @@ var haika = function() {
     },
     
     autoNext: function() {
-      if(auto_next) {
+      if(settings.auto_next) {
         haika.disableAutoplay();
       } else {
         haika.enableAutoplay();
@@ -146,7 +184,16 @@ var haika = function() {
         clearTimeout(refreshTimer);
       }
       haika.next();
-      refreshTimer = setTimeout(function() { haika.refresh(); }, 30 * 1000);
+      refreshTimer = setTimeout(function() { haika.refresh(); }, settings.interval * 1000);
+    },
+    
+    // nextクリック時
+    nextContent: function() {
+      if(settings.auto_next) {
+        haika.refresh();
+      } else {
+        haika.next();
+      }
     }
   };
 }();
