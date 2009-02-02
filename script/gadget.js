@@ -17,6 +17,8 @@ var gadget = function() {
       
       $('next_content').onclick = haika.nextContent;
       $('auto_content').onclick = haika.autoNext;
+      var settings = haika.userSettings;
+      settings.read();
       haika.getTimeline();
       haika.autoNext();
       haika.autoNext();
