@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="utf-8" ?>
 <gadget>
   <name>haika</name>
-  <version>0.3</version>
+  <version>0.3.1</version>
   <author name="maruguu">
     <info url="http://twitter.com/maruguu" text="twitter/maruguu" />
     <logo src="images/icon.png" />
