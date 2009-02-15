@@ -1,0 +1,28 @@
+﻿* {
+  margin: 0;
+  padding 0;
+}
+
+body {
+  width: 210px;
+  height: 100px;
+}
+
+.input-box {
+  width: 186px;
+}
+
+.tab {
+  color : blue;
+  cursor : pointer;
+  text-decoration : underline;
+  margin : 1px 1px 1px 1px ;
+  padding : 1px 1px 1px 1px ;
+  word-break : break-all;
+}
+
+.current_tab {
+  margin : 1px 1px 1px 1px ;
+  padding : 1px 1px 1px 1px ;
+  word-break : break-all;  
+}
