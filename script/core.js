@@ -127,8 +127,8 @@ var haika = function() {
       connecting = true;
       
       status_queue = null;
-      //var url = 'http://h.hatena.ne.jp/api/statuses/public_timeline.json';
-      var url = 'http://h.hatena.ne.jp/api/statuses/keyword_timeline/haika.json';
+      var url = 'http://h.hatena.ne.jp/api/statuses/public_timeline.json';
+      //var url = 'http://h.hatena.ne.jp/api/statuses/keyword_timeline/haika.json';
       url = encodeURI(url);
       var xhr = new XMLHttpRequest();
       xhr.open('GET', url, true);
