@@ -4,6 +4,8 @@ var haika = function() {
   var connecting = false;
   var refreshTimer = null;
   
+  var item_status = null;
+  
   var haikaSettings = function () {
     this.auto_next = false;
     this.interval = 30;
@@ -28,6 +30,22 @@ var haika = function() {
   
   var settings = new haikaSettings();
   
+  var dateFormat = function(date_string) {
+    var t = date_string.split(/\D/);
+    var d = new Date(Date.UTC(t[0], t[1], t[2], t[3], t[4], t[5]));
+    var year = d.getFullYear();
+    var month = addZero(d.getMonth());
+    var date = addZero(d.getDate());
+    var hours = addZero(d.getHours());
+    var minutes = addZero(d.getMinutes());
+    var seconds = addZero(d.getSeconds());
+    return year + '-' + month + '-' + date + ' ' + hours + ':' + minutes + ':' + seconds;
+  };
+  
+  var addZero = function(value) {
+    return (parseInt(value) < 10) ? "0" + value : value;
+  };
+  
   return {
     userSettings: settings,
     
@@ -38,7 +56,6 @@ var haika = function() {
       var anchor = /(<a href=").+(">.+<\/a>)/g;
       var youtube = /(s?https?:\/\/[-_.!~*'()a-zA-Z0-9;\/?:\@&=+\$,%#]+\.youtube\.com\/[-_.!~*'()a-zA-Z0-9;\/?:\@&=+\$,%#]+)/g; //'
       
-      $('keyword').innerHTML = status.keyword;
       var txt = status.text.replace(status.keyword + '=', '');
       
       var atag = txt.match(anchor);
@@ -78,7 +95,7 @@ var haika = function() {
       }
       /*
       if(youtubetag) {
-        var template = '<object width="425" height="350"><param name="movie" value="<URL>"></param><param name="wmode" value="transparent"></param><embed src="<URL>" type="application/x-shockwave-flash" wmode="transparent" width="425" height="350"></embed></object>';
+        var template = '<object width="300" height="250"><param name="movie" value="<URL>"></param><param name="wmode" value="transparent"></param><embed src="<URL>" type="application/x-shockwave-flash" wmode="transparent" width="300" height="250"></embed></object>';
         for(i = 0; i < youtubetag.length; i++) {
           var youtubeobj = template.replace('<URL>', youtubetag[i]);
           txt = txt.replace('<YOUTUBETAG ' + i + ' />', youtubeobj);
@@ -87,7 +104,7 @@ var haika = function() {
       */
       if(imgtag) {
         for(i = 0; i < imgtag.length; i++) {
-          txt = txt.replace('<IMGTAG ' + i + ' />', '<img width="115px" src="' + imgtag[i] + '" />');
+          txt = txt.replace('<IMGTAG ' + i + ' />', '<p><img width="115px" src="' + imgtag[i] + '" /></p>');
         }
       }
       if(atag) {
@@ -96,8 +113,12 @@ var haika = function() {
         }
       }
       txt = txt.replace(/\r\n/g, '<br />');
+      $('keyword').onclick = haika.showItem;
+      $('keyword').innerHTML = status.keyword;
       $('content').innerHTML = txt;
       $('content').scrollTop = 0;
+      item_status = status;
+      item_status.text = txt.replace('width="115px"', '');
     },
     
     // タイムラインを取得する
@@ -106,8 +127,8 @@ var haika = function() {
       connecting = true;
       
       status_queue = null;
-      var url = 'http://h.hatena.ne.jp/api/statuses/public_timeline.json';
-      //var url = 'http://h.hatena.ne.jp/api/statuses/keyword_timeline/YouTube.json';
+      //var url = 'http://h.hatena.ne.jp/api/statuses/public_timeline.json';
+      var url = 'http://h.hatena.ne.jp/api/statuses/keyword_timeline/haika.json';
       url = encodeURI(url);
       var xhr = new XMLHttpRequest();
       xhr.open('GET', url, true);
@@ -132,6 +153,7 @@ var haika = function() {
         } else {
         }
       };
+      item_status = null;
       console.output('タイムライン取得中');
       xhr.send('');
       return ;
@@ -194,7 +216,50 @@ var haika = function() {
       } else {
         haika.next();
       }
+    },
+    
+    showItem: function() {
+      if(System.Gadget.Flyout.show) {
+        System.Gadget.Flyout.show = false;
+        return ;
+      }
+      if(item_status == null) {
+        return;
+      }
+      System.Gadget.Flyout.file = 'item.html';
+      System.Gadget.Flyout.onShow = function() { 
+        var doc = System.Gadget.Flyout.document;
+        var image = doc.getElementById('profile-image');
+        image.innerHTML = '<img width="32px" height="32px" src="' + item_status.user.profile_image_url + '"/>';
+        var keyword = doc.getElementById('keyword');
+        keyword.innerHTML = item_status.keyword;
+        if(item_status.favorited < 10) {
+          for(var i = 0; i < item_status.favorited; i++) {
+            keyword.innerHTML += '<img src="images/star.png" />';
+          }
+        } else {
+          keyword.innerHTML += '<img src="images/star.png" /><font color="#f4b128">' + item_status.favorited + '</font><img src="images/star.png" />';
+        }
+        var content = doc.getElementById('content');
+        content.innerHTML = item_status.text;
+        var screen_name = doc.getElementById('screen_name');
+        screen_name.innerHTML = '<a href="http://h.hatena.ne.jp/' + item_status.user.screen_name + '/">' + item_status.user.screen_name + '</a>';
+        var created_at = doc.getElementById('created_at');
+        created_at.innerHTML = '<a href="http://h.hatena.ne.jp/' + item_status.user.screen_name + '/' + item_status.id + '">' + dateFormat(item_status.created_at) + '</a>';
+        var source = doc.getElementById('source');
+        source.innerHTML = '<a href="http://h.hatena.ne.jp/keyword/' + item_status.source + '">' + item_status.source + '</a>';
+        
+        for(var i = 0; i < doc.images.length; i++) {
+          if(doc.images[i].width > 300) {
+            doc.images[i].width = 300;
+          }
+        }
+        doc.body.style.height = keyword.scrollHeight + content.scrollHeight + 30;
+        doc.focus();
+      };
+      System.Gadget.Flyout.show = true;
     }
+    
   };
 }();
 

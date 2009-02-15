@@ -29,6 +29,7 @@ img {
   padding-left: 1px;
   padding-right: 1px;
   white-space: nowrap;
+  cursor: pointer;
 }
 
 #content {

@@ -1,0 +1,84 @@
+﻿* {
+  margin:0;
+  padding:0;
+  font-family: Meiryo, Verdana, sans-serif;
+  font-size: 10pt;
+
+}
+
+body {
+  width: 480px;
+  font-family: Meiryo, Verdana, sans-serif;
+  font-size: 10pt;
+}
+
+#item-top {
+  width: 480px;
+  height: 8px;
+  background-color: #39707d;
+}
+
+#item-bottom {
+  width: 480px;
+  height: 8px;
+  background-color: #39707d;
+}
+
+#profile-image {
+  margin : 5px 5px 5px 5px;
+  width: 32px;
+  height: 32px;
+}
+
+#keyword {
+  width : 423px;
+  padding : 2px 5px 0px 0px;
+  font-size : 12pt;
+  font-weight: bold;
+  text-decoration: none;
+/*  white-space : nowrap;*/
+  word-break: break-all;
+  overflow: visible;
+}
+
+#content {
+  padding : 0px 5px 2px 0px;
+  width : 423px;
+  word-break: break-all;
+  font-size: 10pt;
+  overflow: visible;
+}
+
+#info {
+  color: #ababce;
+  font-size: 7pt;
+}
+
+#info a:link {
+  color: #b36b85;
+  font-size: 7pt;
+}
+
+#info a:visited {
+  color: #b36b85;
+  font-size: 7pt;
+}
+
+#screen_name {
+  color: #b36b85;
+  padding: 0px 2px 0px 2px;
+  font-size: 7pt;
+}
+
+#created_at {
+  color: #b36b85;
+  padding: 0px 2px 0px 2px;
+  font-size: 7pt;
+}
+
+#source {
+  color: #b36b85;
+  padding: 0px 2px 0px 2px;
+  font-size: 7pt;
+}
+
